@@ -1,4 +1,4 @@
-package commands
+package basic
 
 func GetCommands() map[string]cliCommand {
 	return map[string]cliCommand {

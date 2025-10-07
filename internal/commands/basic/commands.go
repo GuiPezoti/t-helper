@@ -1,7 +1,8 @@
-package commands
+package basic
 
 import ("os"
-		"fmt")
+		"fmt"
+	)
 
 func commandExit() error {
 	fmt.Printf("Closing T-helper... See ya!\n")
