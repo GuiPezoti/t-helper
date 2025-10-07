@@ -4,6 +4,7 @@ import (
     "bufio"
 	"os"
 	"fmt"
+	"flag"
 	"github/GuiPezoti/t-helper/internal/commands/basic"
 )
 
@@ -18,7 +19,13 @@ func StartRepl() {
 		}
 		command, ok := basic.GetCommands()[words[0]]
 		if ok {
-			err := command.Callback()
+			fs := flag.NewFlagSet(command.Name, flag.ContinueOnError)
+			fs.SetOutput(os.Stdout)
+			args := []string{}
+			if len(words) > 1 {
+				args = words[1:]
+			}
+			err := command.Callback(fs, args)
 			if err != nil {
 				fmt.Println(err)
 			}
