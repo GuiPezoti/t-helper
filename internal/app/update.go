@@ -1,18 +1,16 @@
-// internal/app/update.go
 package app
 
 import (
+	"bytes"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// Update é chamado sempre que algo acontece (tecla pressionada, etc)
-// Recebe uma mensagem (msg) e retorna o novo estado (Model) e um comando (Cmd)
+// Update é chamado sempre que algo acontece (apenas lógica de UI)
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	
-	// Mensagens de tecla pressionada
 	case tea.KeyMsg:
 		switch msg.Type {
 		
@@ -44,61 +42,72 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		
 		// Qualquer outra tecla = adicionar ao input
 		default:
-			// Ignora teclas especiais
 			if msg.Type == tea.KeyRunes {
 				m.input += string(msg.Runes)
 				m.cursorPos = len(m.input)
 			}
 		}
 	
-	// Redimensionamento da janela
 	case tea.WindowSizeMsg:
-		// Pode usar msg.Width e msg.Height se precisar
 		return m, nil
 	}
 	
 	return m, nil
 }
 
-// handleCommand processa o comando digitado
+// handleCommand processa o comando usando Cobra
 func (m Model) handleCommand() (tea.Model, tea.Cmd) {
-	// Limpa e separa o input em palavras
 	input := strings.TrimSpace(m.input)
 	if input == "" {
 		return m, nil
 	}
 	
-	words := strings.Fields(input)
-	cmdName := words[0]
-	args := []string{}
-	if len(words) > 1 {
-		args = words[1:]
-	}
-	
 	// Adiciona comando ao output
 	m.output = append(m.output, "$ "+input)
 	
-	// Procura o comando
-	var foundCmd *Command
-	for i := range m.commands {
-		if m.commands[i].Name == cmdName {
-			foundCmd = &m.commands[i]
-			break
-		}
-	}
+	// Parse dos argumentos
+	args := strings.Fields(input)
 	
-	// Executa ou mostra erro
-	var cmd tea.Cmd
-	if foundCmd != nil && foundCmd.Execute != nil {
-		cmd = foundCmd.Execute(&m, args)
+	// Captura a saída do Cobra
+	var buf bytes.Buffer
+	m.rootCmd.SetOut(&buf)
+	m.rootCmd.SetErr(&buf)
+	
+	// Reseta args e executa comando Cobra
+	m.rootCmd.SetArgs(args)
+	
+	// Executa o comando
+	if err := m.rootCmd.Execute(); err != nil {
+		m.output = append(m.output, "Error: "+err.Error())
 	} else {
-		m.output = append(m.output, "Unknown command: "+cmdName)
-		m.output = append(m.output, "Type 'help' to see available commands")
+		// Pega a saída do comando
+		output := strings.TrimSpace(buf.String())
+		
+		// Verifica comandos especiais
+		if output == "__EXIT__" {
+			m.output = append(m.output, "Goodbye! 👋")
+			m.input = ""
+			m.cursorPos = 0
+			return m, tea.Quit
+		}
+		
+		if output == "__CLEAR_SCREEN__" {
+			m.output = []string{}
+			m.input = ""
+			m.cursorPos = 0
+			return m, nil
+		}
+		
+		// Adiciona saída normal ao output
+		if output != "" {
+			lines := strings.Split(output, "\n")
+			m.output = append(m.output, lines...)
+		}
 	}
 	
 	// Limpa o input
 	m.input = ""
 	m.cursorPos = 0
 	
-	return m, cmd
+	return m, nil
 }

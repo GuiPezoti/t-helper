@@ -6,18 +6,19 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github/GuiPezoti/t-helper/internal/app"
+	"github.com/GuiPezoti/t-helper/cmd"
+	"github.com/GuiPezoti/t-helper/internal/app"
 )
 
 func main() {
-	// Cria o programa Bubbletea
+	// Sempre inicia no modo interativo com BubbleTea
+	// mas passa os comandos Cobra para execução
 	p := tea.NewProgram(
-		app.NewModel(),           // Estado inicial
-		tea.WithAltScreen(),      // Usa tela alternativa (limpa ao sair)
-		tea.WithMouseCellMotion(), // Habilita mouse
+		app.NewModel(cmd.GetRootCmd()),
+		tea.WithAltScreen(),
+		tea.WithMouseCellMotion(),
 	)
 
-	// Executa o programa
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Erro: %v\n", err)
 		os.Exit(1)

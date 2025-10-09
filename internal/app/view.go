@@ -1,4 +1,3 @@
-// internal/app/view.go
 package app
 
 import (
@@ -7,7 +6,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Estilos usando Lipgloss (opcional mas deixa bonito!)
+// Estilos usando Lipgloss
 var (
 	promptStyle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("205")).
@@ -26,7 +25,6 @@ var (
 )
 
 // View renderiza o estado atual na tela
-// Retorna uma string que será mostrada no terminal
 func (m Model) View() string {
 	if !m.ready {
 		return "Initializing..."
@@ -55,7 +53,7 @@ func (m Model) View() string {
 	b.WriteString(promptStyle.Render("T-helper > "))
 	b.WriteString(inputStyle.Render(m.input))
 	
-	// Cursor (simples _ piscando)
+	// Cursor
 	if len(m.input) == m.cursorPos {
 		b.WriteString(inputStyle.Render("_"))
 	}
@@ -63,7 +61,7 @@ func (m Model) View() string {
 	b.WriteString("\n\n")
 	
 	// Ajuda no rodapé
-	b.WriteString(outputStyle.Render("Press Ctrl+C to quit"))
+	b.WriteString(outputStyle.Render("Press Ctrl+C to quit | Type 'help' for commands"))
 	
 	return b.String()
 }

@@ -1,39 +1,30 @@
-// internal/app/model.go
 package app
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/spf13/cobra"
 )
 
-// Model é o estado da aplicação
-// Pense nele como "o que a aplicação sabe agora"
+// Model é o estado da aplicação (apenas UI)
 type Model struct {
-	input       string   // O que o usuário está digitando
-	commands    []Command // Comandos disponíveis
-	output      []string  // Histórico de saídas
-	cursorPos   int       // Posição do cursor no input
-	ready       bool      // App está pronto?
-}
-
-// Command representa um comando disponível
-type Command struct {
-	Name        string
-	Description string
-	Execute     func(*Model, []string) tea.Cmd
+	input     string         // O que o usuário está digitando
+	rootCmd   *cobra.Command // Comandos Cobra
+	output    []string       // Histórico de saídas
+	cursorPos int            // Posição do cursor no input
+	ready     bool           // App está pronto?
 }
 
 // NewModel cria o estado inicial da aplicação
-func NewModel() Model {
+func NewModel(rootCmd *cobra.Command) Model {
 	return Model{
-		input:    "",
-		commands: GetCommands(), // Carrega comandos disponíveis
-		output:   []string{"Welcome to T-helper! Type 'help' for commands."},
-		ready:    true,
+		input:   "",
+		rootCmd: rootCmd,
+		output:  []string{rootCmd.Long}, // Usa a mensagem do Cobra
+		ready:   true,
 	}
 }
 
 // Init é chamado uma vez no início
-// Retorna um comando inicial (ou nil)
 func (m Model) Init() tea.Cmd {
 	return nil
 }
