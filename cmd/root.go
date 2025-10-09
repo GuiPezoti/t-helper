@@ -1,18 +1,22 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "t-helper",
-	Short: "T-helper - Your terminal helper",
-	Long: `Welcome to T-helper! Making the development life a little easier`,
-}
+		Use:   "t-helper",
+		Short: "Making the development life a little easier",
+		Long:  `T-helper is a CLI tool to help automate development tasks.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Welcome to T-helper!")
+		},
+	}
 
-// GetRootCmd retorna o comando raiz para ser usado pelo BubbleTea
-func GetRootCmd() *cobra.Command {
-	return rootCmd
+// Execute executa o comando raiz
+func Execute() error {
+	return rootCmd.Execute()
 }
 
 func init() {
